@@ -1,6 +1,23 @@
 ### spacex setup
 export KONG_HOST=kong
 
+
+health() {
+  while true;
+  do
+    curl -sk "http://${KONG_HOST}:8001/status"
+    if [[ $? -eq 0 ]];
+    then
+      break;
+    else
+      echo "not ready. waiting..."
+    fi;
+    sleep 5;
+  done;
+}
+
+health
+
 # delete anything already setup
 curl -X DELETE http://${KONG_HOST}:8001/services/spacex/routes/route1
 curl -X DELETE http://${KONG_HOST}:8001/services/app/routes/route2

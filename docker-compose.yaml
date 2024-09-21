@@ -24,9 +24,7 @@ services:
       test: [CMD-SHELL, pg_isready]
       timeout: 5s
     image: "postgres:${POSTGRES_VERSION:-16.3}"
-    ports:
-      - "5432:5432"
-
+    ports: []
 
 
   kong:
@@ -77,6 +75,7 @@ services:
 
 
   kong-config:
+    container_name: kong-config
     command: ["/bin/bash", "-c", "/tmp/setup.sh"]
     image: "skhatri/curl:8.7.1"
     volumes:
@@ -90,8 +89,7 @@ services:
     container_name: app
     depends_on: {}
     image: skhatri/spring-starter-java:latest
-    ports:
-      - "8080:8080"
+    ports: []
 
 
 
@@ -99,14 +97,12 @@ services:
     container_name: spacex
     depends_on: {}
     image: wiremock/wiremock:3.9.1
-    ports: 
-      - "8090:8080"
+    ports: []
     volumes:
       - ./data/wiremock:/home/wiremock
 
   ui:
     container_name: ui
     image: skhatri/sample-ui 
-    ports:
-      - 3000:3000
+    ports: []
 
