@@ -1,0 +1,112 @@
+services:
+  postgres:
+    command: [/bin/bash, -c, /tmp/scripts/init.sh]
+    container_name: postgres-data
+    depends_on:
+      postgres-server:
+        condition: service_healthy
+    environment:
+      - "POSTGRES_USER=${POSTGRES_USER:-postgres}"
+      - "PGPASSWORD=${POSTGRES_PASSWORD:-postgres}"
+    image: "postgres:${POSTGRES_VERSION:-16.3}"
+    volumes:
+      - "./data/postgres/init.sh:/tmp/scripts/init.sh"
+      - "${POSTGRES_DATA:-./data/postgres/data}:/tmp/data"
+  postgres-server:
+    container_name: postgres
+    environment:
+      - "POSTGRES_USER=${POSTGRES_USER:-postgres}"
+      - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}"
+      - PGDATA=/data/postgres
+    healthcheck:
+      interval: 10s
+      retries: 3
+      test: [CMD-SHELL, pg_isready]
+      timeout: 5s
+    image: "postgres:${POSTGRES_VERSION:-16.3}"
+    ports:
+      - "5432:5432"
+
+
+
+  kong:
+    container_name: kong
+    depends_on:
+      kong-data:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_completed_successfully
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=postgres
+      - KONG_PG_USER=postgres
+      - KONG_PG_PASSWORD=postgres
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001,0.0.0.0:8444 ssl
+      - KONG_PLUGINS=rate-limiting
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test: [CMD-SHELL, kong health]
+      timeout: 10s
+    image: "kong:${KONG_VERSION:-3.7.1}"
+    ports:
+      - 8001:8001
+      - 8000:8000
+    restart: unless-stopped
+
+  kong-data:
+    command:
+      - kong
+      - migrations
+      - bootstrap
+    container_name: kong-data
+
+    depends_on:
+      postgres:
+        condition: service_completed_successfully
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=postgres
+      - KONG_PG_USER=postgres
+      - KONG_PG_PASSWORD=postgres
+    image: kong:3.7.1
+
+
+  kong-config:
+    command: ["/bin/bash", "-c", "/tmp/setup.sh"]
+    image: "skhatri/curl:8.7.1"
+    volumes:
+      - ./data/kong:/tmp
+    depends_on:
+      kong-data:
+        condition: service_completed_successfully
+
+
+  app:
+    container_name: app
+    depends_on: {}
+    image: skhatri/spring-starter-java:latest
+    ports:
+      - "8080:8080"
+
+
+
+  spacex:
+    container_name: spacex
+    depends_on: {}
+    image: wiremock/wiremock:3.9.1
+    ports: 
+      - "8090:8080"
+    volumes:
+      - ./data/wiremock:/home/wiremock
+
+  ui:
+    container_name: ui
+    image: skhatri/sample-ui 
+    ports:
+      - 3000:3000
+

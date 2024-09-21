@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/spacex/v3/capsules/C112"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "capsule_serial": "C112",
+      "capsule_id": "dragon1",
+      "status": "active",
+      "original_launch": "2017-02-19T14:39:00.000Z",
+      "original_launch_unix": 1487515140,
+      "missions": [
+        {
+          "name": "CRS-10",
+          "flight": 36
+        },
+        {
+          "name": "CRS-16",
+          "flight": 72
+        },
+        {
+          "name": "CRS-20",
+          "flight": 91
+        }
+      ],
+      "landings": 3,
+      "type": "Dragon 1.1",
+      "details": null,
+      "reuse_count": 2
+    }
+  }
+}
