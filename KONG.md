@@ -96,4 +96,5 @@ curl --request PATCH \
 
 curl http://localhost:8001/routes
 
-
+### cleanup
+run the delete commands from top of this file to cleanup.
