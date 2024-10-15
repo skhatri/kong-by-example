@@ -99,7 +99,7 @@ curl --request PATCH --url http://${KONG_HOST}:8001/services/ui --data retries=6
 
 curl -i -X POST http://${KONG_HOST}:8001/services/ui/routes \
 --data 'paths[]=/ui' \
---data "strip_path=true" \
+--data "strip_path=false" \
 --data name=route4
 
 curl -X GET http://${KONG_HOST}:8001/services/ui/routes/route4
@@ -111,3 +111,4 @@ curl --request PATCH \
 
 
 curl http://${KONG_HOST}:8001/routes
+
